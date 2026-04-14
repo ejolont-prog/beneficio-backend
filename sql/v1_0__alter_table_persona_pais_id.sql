@@ -1,0 +1,1 @@
+alter table estado alter column id_pais type bigint using id_pais::bigint;
