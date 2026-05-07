@@ -3,6 +3,7 @@ package com.example.beneficio.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -27,9 +28,19 @@ public class JwtUtil {
 
     public boolean isTokenValid(String token) {
         try {
+
             Claims claims = getClaims(token);
+
+            System.out.println("TOKEN OK");
+            System.out.println(claims);
+
             return claims.getExpiration().after(new Date());
+
         } catch (Exception e) {
+
+            System.out.println("ERROR JWT:");
+            e.printStackTrace();
+
             return false;
         }
     }
@@ -45,6 +56,11 @@ public class JwtUtil {
         // Extraemos el ID que guardamos con la clave "idUsuario"
         // Es importante usar el mismo nombre que pusiste en generateToken
         return claims.get("idUsuario", Long.class);
+    }
+
+    @PostConstruct
+    public void testSecret() {
+        System.out.println("JWT SECRET = " + secretKey);
     }
 
 }

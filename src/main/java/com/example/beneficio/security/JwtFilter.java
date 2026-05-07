@@ -10,6 +10,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -24,48 +25,36 @@ public class JwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        // 1. Obtener el encabezado de Authorization
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
-
             try {
-                // 2. Validar el token
                 if (jwtUtil.isTokenValid(token)) {
-                    // 3. Extraer los datos del usuario (Claims)
+                    System.out.println("TOKEN VALIDO");
                     Claims claims = jwtUtil.getClaims(token);
                     String username = claims.getSubject();
 
-                    // 4. Crear la autenticación para Spring Security
-                    // Usamos una lista vacía de permisos (roles) por ahora
                     UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                            username,
-                            null,
-                            Collections.emptyList()
-                    );
+                            username, null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
 
-                    // 5. Establecer la autenticación en el contexto de seguridad
                     SecurityContextHolder.getContext().setAuthentication(auth);
+                }else {
 
-                    // 6. Dejar que la petición continúe
-                    filterChain.doFilter(request, response);
-                    return;
+                    System.out.println("TOKEN INVALIDO");
+
                 }
             } catch (Exception e) {
-                // Si algo falla al procesar el token, el flujo caerá al error 401
+                SecurityContextHolder.clearContext();
+
+                System.out.println("=================================");
+                System.out.println("ERROR VALIDANDO JWT");
+                System.out.println(e.getClass().getName());
+                System.out.println(e.getMessage());
+                System.out.println("=================================");
             }
         }
-
-        // 7. Si llega aquí es porque no hubo token o fue inválido
-        // IMPORTANTE: Permitir que rutas públicas (como Swagger) pasen sin token
-        String path = request.getServletPath();
-        if (path.contains("/swagger-ui") || path.contains("/v3/api-docs") || path.contains("/public")) {
-            filterChain.doFilter(request, response);
-        } else {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType("application/json");
-            response.getWriter().write("{\"error\": \"Token invalido o ausente\"}");
-        }
+        // ESTA LÍNEA DEBE IR SIEMPRE AL FINAL Y FUERA DE CUALQUIER IF/ELSE
+        filterChain.doFilter(request, response);
     }
 }
