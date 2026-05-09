@@ -11,7 +11,7 @@ import java.util.Map;
 @Repository
 public interface TransporteBeneficioRepository extends JpaRepository<Transporte, Long> {
     boolean existsByPlaca(String placa);
-
+    long countByNitAgricultor(String nitAgricultor);
     @Query(value = "SELECT " +
             "    t.idtransporte AS idtransporte, " +
             "    t.placa AS placa, " +

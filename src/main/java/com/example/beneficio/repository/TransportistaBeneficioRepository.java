@@ -16,6 +16,7 @@ public interface TransportistaBeneficioRepository extends JpaRepository<Transpor
      * para evitar registros duplicados en Beneficio.
      */
     boolean existsByCui(String cui);
+    long countByNitAgricultor(String nitAgricultor);
     @Query(value = "SELECT " +
             "    t.idtransportista, " +
             "    COALESCE(a.nombrecomercial, 'SIN NOMBRE') as agricultor, " +
