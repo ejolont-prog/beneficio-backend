@@ -37,6 +37,18 @@ public class Cuenta {
     @Column(name = "eliminado")
     private Boolean eliminado = false;
 
+    @Column(name = "idestadopesaje") // Para el ID 27
+    private Integer idEstadoPesaje;
+
+    @Column(name = "idunidadpeso")   // Para el ID del catálogo (Quintal, etc.)
+    private Integer idUnidadPeso;
+
+    @Column(name = "creadopor")      // Para el ID 1
+    private Integer creadoPor;
+
+    @Column(name = "modificadopor")  // Para el ID 1
+    private Integer modificadoPor;
+
     // --- GETTERS Y SETTERS EXISTENTES ---
     public Long getIdcuenta() { return idcuenta; }
     public void setIdcuenta(Long idcuenta) { this.idcuenta = idcuenta; }
@@ -68,4 +80,16 @@ public class Cuenta {
 
     public Integer getEstado() { return estado; }
     public void setEstado(Integer estado) { this.estado = estado; }
+
+    public Integer getIdEstadoPesaje() { return idEstadoPesaje; }
+    public void setIdEstadoPesaje(Integer idEstadoPesaje) { this.idEstadoPesaje = idEstadoPesaje; }
+
+    public Integer getIdUnidadPeso() { return idUnidadPeso; }
+    public void setIdUnidadPeso(Integer idUnidadPeso) { this.idUnidadPeso = idUnidadPeso; }
+
+    public Integer getCreadoPor() { return creadoPor; }
+    public void setCreadoPor(Integer creadoPor) { this.creadoPor = creadoPor; }
+
+    public Integer getModificadoPor() { return modificadoPor; }
+    public void setModificadoPor(Integer modificadoPor) { this.modificadoPor = modificadoPor; }
 }
