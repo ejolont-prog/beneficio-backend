@@ -11,16 +11,18 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 
 import java.util.List;
-
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
+    private final ApiKeyFilter apiKeyFilter; // 1. Inyectamos el nuevo filtro
 
-    public SecurityConfig(JwtFilter jwtFilter) {
+    public SecurityConfig(JwtFilter jwtFilter, ApiKeyFilter apiKeyFilter) {
         this.jwtFilter = jwtFilter;
+        this.apiKeyFilter = apiKeyFilter;
     }
+
     @Value("${app.cors.allowed-origins}")
     private List<String> allowedOrigins;
 
@@ -37,13 +39,18 @@ public class SecurityConfig {
                 }))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                        .requestMatchers("/api/transportes-beneficio/**").authenticated() // <--- Fuerza la protección aquí
+                        // 2. Permitimos el acceso al endpoint que recibirá el JSON de Agricultor
+                        // Usamos permitAll() porque la validación la hará el ApiKeyFilter manualmente
+                        .requestMatchers("/api/recepcion-pesaje/**").permitAll()
+
+                        .requestMatchers("/api/transportes-beneficio/**").authenticated()
                         .requestMatchers("/api/transportistas-beneficio/**").authenticated()
-                        .requestMatchers("/api/transportes-beneficio/**").hasRole("beneficio")
                         .requestMatchers("/api/catalogos/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // 3. Agregamos el ApiKeyFilter ANTES del JwtFilter
+                .addFilterBefore(apiKeyFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
