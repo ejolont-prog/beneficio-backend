@@ -9,14 +9,17 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 import java.util.List;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
-    private final ApiKeyFilter apiKeyFilter; // 1. Inyectamos el nuevo filtro
+    private final ApiKeyFilter apiKeyFilter;
 
     public SecurityConfig(JwtFilter jwtFilter, ApiKeyFilter apiKeyFilter) {
         this.jwtFilter = jwtFilter;
@@ -26,30 +29,46 @@ public class SecurityConfig {
     @Value("${app.cors.allowed-origins}")
     private List<String> allowedOrigins;
 
+    // 1. Definimos CORS de forma explícita para que Spring lo aplique ANTES que los filtros
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        // Usamos la variable inyectada o la lista manual si prefieres
+        config.setAllowedOrigins(List.of("http://localhost:4600", "http://localhost:4200"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "Accept"));
+        config.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                // 2. Aplicamos CORS al inicio de la cadena
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(request -> {
-                    CorsConfiguration config = new CorsConfiguration();
-                    config.setAllowedOrigins(List.of("http://localhost:4600", "http://localhost:4200"));
-                    config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-                    config.setAllowedHeaders(List.of("*"));
-                    return config;
-                }))
+                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        // Rutas públicas (Swagger y Docs)
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                        // 2. Permitimos el acceso al endpoint que recibirá el JSON de Agricultor
-                        // Usamos permitAll() porque la validación la hará el ApiKeyFilter manualmente
-                        .requestMatchers("/api/recepcion-pesaje/**").permitAll()
 
+                        // Endpoints públicos de negocio
+                        .requestMatchers("/api/recepcion-pesaje/**").permitAll()
+                        .requestMatchers("/api/recepcion-parcialidad/**").permitAll()
+                        .requestMatchers("/api/detalle/**").permitAll()
+                        .requestMatchers("/api/cuentas/**").permitAll()
+
+                        // Endpoints protegidos
                         .requestMatchers("/api/transportes-beneficio/**").authenticated()
                         .requestMatchers("/api/transportistas-beneficio/**").authenticated()
                         .requestMatchers("/api/catalogos/**").authenticated()
+
                         .anyRequest().authenticated()
                 )
-                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                // 3. Agregamos el ApiKeyFilter ANTES del JwtFilter
+                // 3. Filtros personalizados
                 .addFilterBefore(apiKeyFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
