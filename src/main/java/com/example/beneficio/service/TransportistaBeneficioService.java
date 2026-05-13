@@ -34,7 +34,7 @@ public class TransportistaBeneficioService {
     public Transportista procesarRegistro(TransportistaRequestDTO dto) {
         // Validación de CUI en Beneficio
         if (repository.existsByCui(dto.getCui())) {
-            throw new RuntimeException("El CUI " + dto.getCui() + " ya existe en Beneficio.");
+            throw new RuntimeException("Ya existe un transportista registrado con el CUI  " + dto.getCui());
         }
 
         Transportista t = new Transportista();
