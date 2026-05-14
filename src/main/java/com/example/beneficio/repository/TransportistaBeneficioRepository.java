@@ -3,6 +3,7 @@ package com.example.beneficio.repository;
 import com.example.beneficio.model.Transportista;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -16,7 +17,10 @@ public interface TransportistaBeneficioRepository extends JpaRepository<Transpor
      * para evitar registros duplicados en Beneficio.
      */
     boolean existsByCui(String cui);
-    long countByNitAgricultor(String nitAgricultor);
+
+    @Query(value = "SELECT COUNT(*) FROM beneficio.transportistas WHERE agricultor = :nit", nativeQuery = true)
+    long countByAgricultorNative(@Param("nit") String nit);
+
     @Query(value = "SELECT " +
             "    t.idtransportista, " +
             "    COALESCE(a.nombrecomercial, 'SIN NOMBRE') as agricultor, " +

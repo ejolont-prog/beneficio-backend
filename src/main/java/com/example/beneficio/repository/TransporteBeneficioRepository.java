@@ -3,6 +3,7 @@ package com.example.beneficio.repository;
 import com.example.beneficio.model.Transporte;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -11,7 +12,10 @@ import java.util.Map;
 @Repository
 public interface TransporteBeneficioRepository extends JpaRepository<Transporte, Long> {
     boolean existsByPlaca(String placa);
-    long countByNitAgricultor(String nitAgricultor);
+
+    @Query(value = "SELECT COUNT(*) FROM beneficio.transportes WHERE agricultor = :nit", nativeQuery = true)
+    long countByAgricultorNative(@Param("nit") String nit);
+
     @Query(value = "SELECT " +
             "    t.idtransporte AS idtransporte, " +
             "    t.placa AS placa, " +
