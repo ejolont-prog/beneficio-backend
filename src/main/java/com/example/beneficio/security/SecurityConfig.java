@@ -60,6 +60,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/recepcion-parcialidad/**").permitAll()
                         .requestMatchers("/api/detalle/**").permitAll()
                         .requestMatchers("/api/cuentas/**").permitAll()
+                        .requestMatchers("/api/transportes-beneficio/**").permitAll()
 
                         // Endpoints protegidos
                         .requestMatchers("/api/transportes-beneficio/**").authenticated()

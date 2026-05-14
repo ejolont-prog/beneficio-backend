@@ -38,11 +38,9 @@ public class AgricultorREST {
     @GetMapping("/conteos/{nit}")
     public Map<String, Long> obtenerConteos(@PathVariable String nit) {
         Map<String, Long> conteos = new HashMap<>();
-        // Aquí usamos los repositorios correspondientes
-        // Asumiendo que tienes CuentasRepository, TransportesRepository, etc.
-        conteos.put("cuentas", cuentasRepository.countByNitAgricultor(nit));
-        conteos.put("transportes", transportesRepository.countByNitAgricultor(nit));
-        conteos.put("transportistas", transportistasRepository.countByNitAgricultor(nit));
+        conteos.put("cuentas", cuentasRepository.countByNitAgricultorNative(nit));
+        conteos.put("transportes", transportesRepository.countByAgricultorNative(nit));
+        conteos.put("transportistas", transportistasRepository.countByAgricultorNative(nit));
         return conteos;
     }
 }

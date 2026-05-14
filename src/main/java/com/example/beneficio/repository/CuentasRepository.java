@@ -5,12 +5,14 @@ import com.example.beneficio.dto.CuentaDetalleDTO;
 import com.example.beneficio.model.Cuenta;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CuentasRepository extends JpaRepository<Cuenta, Long> {
-    // Cambiamos la 'a' minúscula por 'A' mayúscula para que coincida con la variable de la entidad
-    long countByNitAgricultor(String nit);
+
+    @Query(value = "SELECT COUNT(*) FROM beneficio.cuentas WHERE nitagricultor = :nit", nativeQuery = true)
+    long countByNitAgricultorNative(@Param("nit") String nit);
 
     // En CuentasRepository.java
     @Query(value = "SELECT COALESCE(MAX(CAST(nocuenta AS INTEGER)), 0) FROM beneficio.cuentas", nativeQuery = true)

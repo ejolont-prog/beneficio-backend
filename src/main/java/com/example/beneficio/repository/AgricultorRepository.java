@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface AgricultorRepository extends JpaRepository<Agricultor, String> {
-    // No necesitas escribir código aquí, JpaRepository ya trae findAll()
+
 }

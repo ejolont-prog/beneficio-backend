@@ -17,6 +17,7 @@ public class Transporte {
     private String linea;
     private String modelo;
     private Integer estado;
+    private String tipoplaca;
 
     @Column(name = "agricultor")
     private String nitAgricultor;
