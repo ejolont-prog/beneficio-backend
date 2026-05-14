@@ -21,7 +21,7 @@ public interface TransporteBeneficioRepository extends JpaRepository<Transporte,
             "FROM beneficio.transportes t " +
             "INNER JOIN beneficio.catalogos c ON (CAST(t.estado AS TEXT) = CAST(c.id AS TEXT)) " +
             "LEFT JOIN beneficio.agricultores a ON (CAST(t.agricultor AS TEXT) = CAST(a.nit AS TEXT)) " +
-            "WHERE t.disponible = true",
+            "WHERE t.eliminado = false",
             nativeQuery = true)
     List<Map<String, Object>> listarTodoConDetalle();
 }

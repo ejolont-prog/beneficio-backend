@@ -67,12 +67,12 @@ public class TransporteBeneficioService {
     @Transactional
     public Transporte procesarRegistro(TransporteRequestDTO dto) {
         if (repository.existsByPlaca(dto.getPlaca())) {
-            throw new RuntimeException("La placa " + dto.getPlaca() + " ya existe en Beneficio.");
+            throw new RuntimeException("Ya existe un transporte registrado con la placa " + dto.getPlaca());
         }
 
         Transporte t = new Transporte();
         t.setPlaca(dto.getPlaca());
-
+        t.setTipoplaca(dto.getNombreTipoPlaca());
         // Guardamos el texto literal que viene del DTO
         t.setMarca(dto.getNombreMarca());
         t.setLinea(dto.getNombreLinea());
