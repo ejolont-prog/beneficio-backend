@@ -1,7 +1,7 @@
 package com.example.beneficio.model;
 
 import jakarta.persistence.*;
-import java.math.BigDecimal; // Importante para el peso
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -10,12 +10,12 @@ public class Cuenta {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idcuenta; // Esta es la PK serial4 de tu tabla
+    private Long idcuenta;
 
-    @Column(name = "nocuenta") // Varchar(50) en BD
+    @Column(name = "nocuenta")
     private String noCuenta;
 
-    private Integer estado; // int4 en BD
+    private Integer estado;
 
     @Column(name = "nitagricultor")
     private String nitAgricultor;
@@ -26,32 +26,40 @@ public class Cuenta {
     @Column(name = "fechacreacion")
     private LocalDateTime fechaCreacion;
 
-    // --- NUEVOS CAMPOS PARA EL JSON (Sin borrar lo anterior) ---
-
     @Column(name = "pesototalesperado")
     private BigDecimal pesoTotalEsperado;
 
-    @Column(name = "id") // El campo int8 que viste en la imagen
+    @Column(name = "id")
     private Long idPesajeExterno;
 
     @Column(name = "eliminado")
     private Boolean eliminado = false;
 
-    @Column(name = "idestadopesaje") // Para el ID 27
+    // Forzamos explícitamente el nombre exacto de la columna en la BD
+    @Column(name = "estadopesaje", nullable = true)
     private Integer idEstadoPesaje;
 
-    @Column(name = "idunidadpeso")   // Para el ID del catálogo (Quintal, etc.)
+    @Column(name = "idunidadpeso")
     private Integer idUnidadPeso;
 
-    @Column(name = "creadopor")      // Para el ID 1
+    @Column(name = "creadopor")
     private Integer creadoPor;
 
-    @Column(name = "modificadopor")  // Para el ID 1
+    @Column(name = "modificadopor")
     private Integer modificadoPor;
 
-    // --- GETTERS Y SETTERS EXISTENTES ---
+    // ==========================================
+    // GETTERS Y SETTERS ORDENADOS Y SIN DUPLICADOS
+    // ==========================================
+
     public Long getIdcuenta() { return idcuenta; }
     public void setIdcuenta(Long idcuenta) { this.idcuenta = idcuenta; }
+
+    public String getNoCuenta() { return noCuenta; }
+    public void setNoCuenta(String noCuenta) { this.noCuenta = noCuenta; }
+
+    public Integer getEstado() { return estado; }
+    public void setEstado(Integer estado) { this.estado = estado; }
 
     public String getNitAgricultor() { return nitAgricultor; }
     public void setNitAgricultor(String nitAgricultor) { this.nitAgricultor = nitAgricultor; }
@@ -65,7 +73,6 @@ public class Cuenta {
     public LocalDateTime getFechaCreacion() { return fechaCreacion; }
     public void setFechaCreacion(LocalDateTime fechaCreacion) { this.fechaCreacion = fechaCreacion; }
 
-    // --- NUEVOS GETTERS Y SETTERS ---
     public BigDecimal getPesoTotalEsperado() { return pesoTotalEsperado; }
     public void setPesoTotalEsperado(BigDecimal pesoTotalEsperado) { this.pesoTotalEsperado = pesoTotalEsperado; }
 
@@ -74,12 +81,6 @@ public class Cuenta {
 
     public Boolean getEliminado() { return eliminado; }
     public void setEliminado(Boolean eliminado) { this.eliminado = eliminado; }
-
-    public String getNoCuenta() { return noCuenta; }
-    public void setNoCuenta(String noCuenta) { this.noCuenta = noCuenta; }
-
-    public Integer getEstado() { return estado; }
-    public void setEstado(Integer estado) { this.estado = estado; }
 
     public Integer getIdEstadoPesaje() { return idEstadoPesaje; }
     public void setIdEstadoPesaje(Integer idEstadoPesaje) { this.idEstadoPesaje = idEstadoPesaje; }
