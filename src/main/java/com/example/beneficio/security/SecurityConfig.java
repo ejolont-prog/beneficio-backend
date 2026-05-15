@@ -69,6 +69,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/beneficio/consulta-qr").permitAll()
                         .requestMatchers("/api/beneficio/movimiento-talanquera").permitAll()
                         .requestMatchers("/ws-beneficio/**").permitAll()
+                        .requestMatchers("/api/sincronizar/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 // 3. Filtros personalizados
