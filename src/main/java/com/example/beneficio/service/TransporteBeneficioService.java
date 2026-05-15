@@ -10,6 +10,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.messaging.simp.SimpMessagingTemplate; // <--- AÑADIDO
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -30,6 +31,9 @@ public class TransporteBeneficioService {
     @Autowired
     private RestTemplate restTemplate;
 
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate; // <--- AÑADIDO
+
     @Transactional
     public void actualizarEstadoSincronizado(UpdateEstadoDTO dto, String token) {
         // 1. Local (Beneficio)
@@ -38,18 +42,22 @@ public class TransporteBeneficioService {
 
         t.setEstado(dto.getNuevoEstadoIdBeneficio());
         t.setObservaciones(dto.getObservaciones());
-        // Asegúrate de que getCurrentUserId() no devuelva null
         t.setModificadopor(userSecurityService.getCurrentUserId().intValue());
         t.setFechamodificacion(LocalDateTime.now());
         repository.save(t);
+
+        // --- NOTIFICAR VIA WEBSOCKET (Beneficio) ---
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("idtransporte", t.getIdtransporte());
+        payload.put("estado", dto.getNombreEstado());
+        payload.put("observaciones", dto.getObservaciones());
+        messagingTemplate.convertAndSend("/topic/actualizacion-transporte-beneficio", payload);
 
         // 2. Sincronización
         try {
             String urlAgricultor = "http://localhost:8081/api/transportes/sincronizar-estado";
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            // El token ya viene con "Bearer " si viene del Interceptor,
-            // pero si lo estás agregando manualmente, verifica que no se duplique.
             headers.set("Authorization", token);
 
             Map<String, Object> body = new HashMap<>();
@@ -59,7 +67,6 @@ public class TransporteBeneficioService {
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
             restTemplate.exchange(urlAgricultor, HttpMethod.PUT, entity, String.class);
         } catch (Exception e) {
-            // Log para saber por qué falló la parte de Agricultor
             System.err.println("Error en Agricultor: " + e.getMessage());
         }
     }
@@ -73,7 +80,6 @@ public class TransporteBeneficioService {
         Transporte t = new Transporte();
         t.setPlaca(dto.getPlaca());
         t.setTipoplaca(dto.getNombreTipoPlaca());
-        // Guardamos el texto literal que viene del DTO
         t.setMarca(dto.getNombreMarca());
         t.setLinea(dto.getNombreLinea());
         t.setColor(dto.getNombreColor());
@@ -83,6 +89,11 @@ public class TransporteBeneficioService {
         t.setEstado(7);
         t.setDisponible(true);
 
-        return repository.save(t);
+        Transporte guardado = repository.save(t);
+
+        // --- NOTIFICAR NUEVO REGISTRO ---
+        messagingTemplate.convertAndSend("/topic/actualizacion-transporte-beneficio", guardado);
+
+        return guardado;
     }
 }
