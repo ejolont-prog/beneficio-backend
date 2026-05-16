@@ -27,7 +27,7 @@ public class DetalleCuentaService {
 
         // Valores iniciales por defecto
         detalle.setEstado(1); // Supongamos que 1 es 'Registrado'
-        detalle.setEstadopesaje(1);
+        detalle.setEstadopesaje(67);
         detalle.setEliminado(false);
         detalle.setFechacreacion(LocalDateTime.now());
         detalle.setCreadopor(1); // ID de sistema o usuario genérico
