@@ -52,6 +52,9 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        // 🚨 SOLUCIÓN AQUÍ: Permitir todas las peticiones preliminares OPTIONS (Preflight) de CORS
+                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
+
                         // Rutas públicas (Swagger y Docs)
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
 
@@ -61,6 +64,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/detalle/**").permitAll()
                         .requestMatchers("/api/cuentas/**").permitAll()
                         .requestMatchers("/api/transportes-beneficio/**").permitAll()
+                        .requestMatchers("/api/detalle-cuenta/**").permitAll()
 
                         // Endpoints protegidos
                         .requestMatchers("/api/transportes-beneficio/**").authenticated()

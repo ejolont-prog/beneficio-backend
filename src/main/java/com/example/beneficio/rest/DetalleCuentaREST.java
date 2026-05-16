@@ -27,4 +27,20 @@ public class DetalleCuentaREST {
             return ResponseEntity.internalServerError().build();
         }
     }
+
+
+    @Autowired
+    private com.example.beneficio.service.ValidacionEnvioService validacionEnvioService;
+
+    @PutMapping("/validar-recepcion/{idDetalle}")
+    public ResponseEntity<com.example.beneficio.dto.RespuestaValidacionDTO> procesarRecepcion(
+            @PathVariable Long idDetalle,
+            @RequestParam String placa,
+            @RequestParam String cui) {
+
+        com.example.beneficio.dto.RespuestaValidacionDTO resultado =
+                validacionEnvioService.validarChoferYCamion(idDetalle, placa, cui);
+
+        return ResponseEntity.ok(resultado);
+    }
 }
