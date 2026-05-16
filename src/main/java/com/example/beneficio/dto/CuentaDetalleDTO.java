@@ -11,4 +11,5 @@ public interface CuentaDetalleDTO {
     Integer getCantParcialidades();
     LocalDateTime getFechaEnvio();
     String getEstadoNombre();
+
 }

@@ -1,5 +1,6 @@
 package com.example.beneficio.rest;
 
+import com.example.beneficio.dto.EstadoCatalogoDTO;
 import com.example.beneficio.model.Catalogo;
 import com.example.beneficio.repository.CatalogoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,4 +21,6 @@ public class CatalogoREST {
     public ResponseEntity<List<Catalogo>> listarEstados() {
         return ResponseEntity.ok(repository.findEstadosTransporte());
     }
+
+
 }
