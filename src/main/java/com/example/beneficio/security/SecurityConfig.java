@@ -74,6 +74,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/beneficio/consulta-qr").permitAll()
                         .requestMatchers("/api/beneficio/movimiento-talanquera").permitAll()
                         .requestMatchers("/ws-beneficio/**").permitAll()
+                        .requestMatchers("/api/sincronizar/**").permitAll()
                         .requestMatchers("/api/cuentas/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/cuentas/*/resumen-modal").permitAll()
                         .anyRequest().authenticated()
