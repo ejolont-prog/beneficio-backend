@@ -52,29 +52,9 @@ public class CuentaREST {
         }
     }
 
-    // =========================================================================
-    // NUEVOS ENDPOINTS: REGLAS DE NEGOCIO PARA EL BENEFICIO
-    // =========================================================================
 
 
-    /*
-    @PutMapping("/{noCuenta}/cambiar-estado")
-    public ResponseEntity<?> cambiarEstadoCuenta(@PathVariable String noCuenta, @RequestBody CambiarEstadoDTO dto) {
-        try {
-            Cuenta cuentaActualizada = cuentaService.cambiarEstadoCiclo(
-                    noCuenta,
-                    dto.getIdEstadoPesaje(),
-                    dto.getEstadoNombre(),
-                    dto.getPesoCabalTotal()
-            );
-            return ResponseEntity.ok(cuentaActualizada);
-        } catch (Exception e) {
-            Map<String, String> error = new HashMap<>();
-            error.put("mensaje", e.getMessage());
-            return ResponseEntity.badRequest().body(error);
-        }
-    }
-*/
+
 
     @PutMapping("/{noCuenta}/cambiar-estado")
     public ResponseEntity<?> cambiarEstadoCuenta(@PathVariable String noCuenta, @RequestBody CambiarEstadoDTO dto) {
@@ -115,6 +95,27 @@ public class CuentaREST {
             return ResponseEntity.badRequest().body(error);
         }
     }
+
+
+
+    // =========================================================================
+    @GetMapping("/publico/resumen-ojito/{noCuenta}")
+    public ResponseEntity<?> obtenerResumenPublicoOjito(@PathVariable String noCuenta) {
+        try {
+            java.util.Map<String, Object> datos = cuentasRepository.obtenerResumenSencilloOjito(noCuenta);
+
+            if (datos == null || datos.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("mensaje", "No se encontraron datos."));
+            }
+
+            return ResponseEntity.ok(datos);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("mensaje", "Error: " + e.getMessage()));
+        }
+    }
+
 
     @PostMapping("/parcialidades/{idDetalleCuenta}/validar-recepcion")
     public ResponseEntity<?> validarRecepcionParcialidad(

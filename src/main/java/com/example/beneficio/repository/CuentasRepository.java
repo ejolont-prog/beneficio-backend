@@ -39,4 +39,26 @@ public interface CuentasRepository extends JpaRepository<Cuenta, Long> {
             "LEFT JOIN beneficio.catalogos cat ON c.estadopesaje = cat.id " +
             "WHERE c.nocuenta = :noCuenta", nativeQuery = true)
     String findEstadoNombreByNoCuenta(@Param("noCuenta") String noCuenta);
+
+
+    // =========================================================================
+    // 👁️ NUEVO MÉTODO EXCLUSIVO PARA EL OJITO (MAPEA DIRECTO A UN MAP)
+    // =========================================================================
+    @Query(value = "SELECT " +
+            "c.idcuenta as \"idCuenta\", " +
+            "c.nocuenta as \"noCuenta\", " +
+            "c.nitagricultor as \"nitAgricultor\", " +
+            "a.razonsocial as \"razonSocial\", " +
+            "c.pesototalesperado as \"pesoTotalEsperado\", " +
+            "c.pesototalrecibido as \"pesoTotalRecibido\", " +
+            "c.diferenciatotal as \"diferenciaTotal\", " +
+            "c.tolerancia as \"tolerancia\", " +
+            "c.resultadotolerancia as \"resultadoTolerancia\", " +
+            "cat.detallecatalogo as \"estadoNombre\" " +
+            "FROM beneficio.cuentas c " +
+            "LEFT JOIN beneficio.agricultores a ON TRIM(c.nitagricultor) = TRIM(a.nit) " +
+            "LEFT JOIN beneficio.catalogos cat ON c.estadopesaje = cat.id " +
+            "WHERE c.nocuenta = :noCuentaParam", nativeQuery = true)
+    java.util.Map<String, Object> obtenerResumenSencilloOjito(@Param("noCuentaParam") String noCuentaParam);
+
 }

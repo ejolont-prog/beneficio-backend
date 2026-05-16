@@ -15,22 +15,35 @@ public class ValidacionEnvioService {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    // Instanciamos RestTemplate para hacer peticiones HTTP directas a otros microservicios
     private final RestTemplate restTemplate = new RestTemplate();
 
     @Transactional
     public void actualizarEstadoParcialidad(Long idDetalle, Integer nuevoEstado) {
-
         String sqlUpdate = "UPDATE beneficio.detallecuenta SET estadopesaje = ? WHERE iddetallecuenta = ?";
         jdbcTemplate.update(sqlUpdate, nuevoEstado, idDetalle);
     }
 
+    // 🚨 NUEVO MÉTODO: Actualiza el estado de la cuenta principal al ID 29
+    @Transactional
+    public void actualizarEstadoCuenta(String noCuenta, Integer nuevoEstado) {
+        // NOTA: Ajusta "beneficio.cuentas" y "nocuenta" según se llamen exactamente en tu BD de Beneficio
+        String sqlUpdateCuenta = "UPDATE beneficio.cuentas SET estadopesaje = ? WHERE nocuenta = ?";
+        jdbcTemplate.update(sqlUpdateCuenta, nuevoEstado, noCuenta);
+        System.out.println("🔄 Cuenta " + noCuenta + " actualizada al estado ID: " + nuevoEstado);
+    }
+
     public RespuestaValidacionDTO validarChoferYCamion(Long idDetalle, String placa, String cui) {
         String noParcialidad = "";
+        String noCuenta = ""; // 👈 Variable para almacenar el número de cuenta asociado
+
         try {
-            // 0. Obtener el número de parcialidad de esta fila antes de procesar para la notificación posterior
-            String sqlInfo = "SELECT noparcialidad FROM beneficio.detallecuenta WHERE iddetallecuenta = ? LIMIT 1";
-            noParcialidad = jdbcTemplate.queryForObject(sqlInfo, String.class, idDetalle);
+            // 0. Obtener el número de parcialidad Y el número de cuenta de esta fila antes de procesar
+            // 🚨 NOTA: Asegúrate de que la columna se llame "nocuenta" en beneficio.detallecuenta
+            String sqlInfo = "SELECT noparcialidad, nocuenta FROM beneficio.detallecuenta WHERE iddetallecuenta = ? LIMIT 1";
+
+            Map<String, Object> datosDetalle = jdbcTemplate.queryForMap(sqlInfo, idDetalle);
+            noParcialidad = String.valueOf(datosDetalle.get("noparcialidad"));
+            noCuenta = String.valueOf(datosDetalle.get("nocuenta"));
 
             // 1. Validar Estado del Vehículo
             String sqlVehiculo = "SELECT estado FROM beneficio.transportes WHERE placa = ? LIMIT 1";
@@ -41,15 +54,20 @@ public class ValidacionEnvioService {
             Integer estadoPiloto = jdbcTemplate.queryForObject(sqlPiloto, Integer.class, cui);
 
             if (estadoVehiculo != null && estadoVehiculo == 7 && estadoPiloto != null && estadoPiloto == 7) {
-                // ÉXITO LOCAL: Pasa al ID 21
+                // ÉXITO LOCAL: Parcialidad pasa al ID 21
                 actualizarEstadoParcialidad(idDetalle, 21);
+
+                // 🚨 ¡CUMPLIENDO REQUERIMIENTO!: Si todo está OK, la cuenta pasa al ID 29
+                if (noCuenta != null && !noCuenta.isEmpty() && !"null".equals(noCuenta)) {
+                    actualizarEstadoCuenta(noCuenta, 29);
+                }
 
                 // 🌐 SINCRONIZAR CON AGRICULTOR (ACEPTADO)
                 notificarAlAgricultor(noParcialidad, "ACEPTADO");
 
-                return new RespuestaValidacionDTO(true, "Se confirma la recepción de la parcialidad. Sincronizado con Agricultor.", 21);
+                return new RespuestaValidacionDTO(true, "Se confirma la recepción de la parcialidad. Cuenta y Agricultor sincronizados.", 21);
             } else {
-                // RECHAZO LOCAL: Pasa al ID 68
+                // RECHAZO LOCAL: Pasa al ID 68 (Aquí no tocamos la cuenta general, solo rechazamos este viaje)
                 actualizarEstadoParcialidad(idDetalle, 68);
 
                 String motivo = "";
@@ -64,11 +82,10 @@ public class ValidacionEnvioService {
 
         } catch (Exception e) {
             actualizarEstadoParcialidad(idDetalle, 68);
-            // Si el error ocurrió después de conseguir el noparcialidad, intentamos notificar el rechazo forzado
             if (noParcialidad != null && !noParcialidad.isEmpty()) {
                 notificarAlAgricultor(noParcialidad, "RECHAZADO");
             }
-            return new RespuestaValidacionDTO(false, "Recepción Rechazada: Placa o CUI inválidos. Sincronizado con Agricultor.", 68);
+            return new RespuestaValidacionDTO(false, "Recepción Rechazada: Error interno o datos inválidos. " + e.getMessage(), 68);
         }
     }
 
@@ -79,17 +96,14 @@ public class ValidacionEnvioService {
         try {
             String urlAgricultor = "http://localhost:8081/api/externo/actualizar-parcialidad";
 
-            // Creamos el mapa que Jackson convertirá automáticamente en el JSON esperado
             Map<String, String> bodyJson = new HashMap<>();
             bodyJson.put("noparcialidad", noParcialidad);
             bodyJson.put("resultado", resultado);
 
-            // Ejecutamos la petición PUT hacia el Agricultor
             restTemplate.put(urlAgricultor, bodyJson);
             System.out.println(" Sincronización exitosa enviada a Agricultor para la parcialidad: " + noParcialidad);
 
         } catch (Exception e) {
-            // Imprimimos el error por consola para no tumbar la transacción del beneficio si el servidor de Agricultor está apagado
             System.err.println("❌ No se pudo sincronizar el estado con el servidor de Agricultor: " + e.getMessage());
         }
     }

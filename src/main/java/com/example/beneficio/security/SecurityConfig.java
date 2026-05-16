@@ -3,6 +3,7 @@ package com.example.beneficio.security;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -73,6 +74,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/beneficio/consulta-qr").permitAll()
                         .requestMatchers("/api/beneficio/movimiento-talanquera").permitAll()
                         .requestMatchers("/ws-beneficio/**").permitAll()
+                        .requestMatchers("/api/cuentas/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/cuentas/*/resumen-modal").permitAll()
                         .anyRequest().authenticated()
                 )
                 // 3. Filtros personalizados
