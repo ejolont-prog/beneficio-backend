@@ -49,7 +49,27 @@ public class Cuenta {
     private Integer modificadoPor;
 
     // ==========================================
-    // GETTERS Y SETTERS ORDENADOS Y SIN DUPLICADOS
+    // NUEVOS CAMPOS AGREGADOS (SIN DUPLICADOS)
+    // ==========================================
+
+    @Column(name = "pesototalrecibido")
+    private BigDecimal pesoTotalRecibido;
+
+    @Column(name = "diferenciatotal")
+    private BigDecimal diferenciaTotal;
+
+    @Column(name = "resultadotolerancia")
+    private String resultadoTolerancia;
+
+    @Column(name = "tolerancia")
+    private BigDecimal tolerancia;
+
+    @Column(name = "fechamodificacion")
+    private LocalDateTime fechaModificacion;
+
+
+    // ==========================================
+    // GETTERS Y SETTERS ORIGINALES
     // ==========================================
 
     public Long getIdcuenta() { return idcuenta; }
@@ -93,4 +113,23 @@ public class Cuenta {
 
     public Integer getModificadoPor() { return modificadoPor; }
     public void setModificadoPor(Integer modificadoPor) { this.modificadoPor = modificadoPor; }
+
+    // ==========================================
+    // GETTERS Y SETTERS DE LOS NUEVOS CAMPOS
+    // ==========================================
+
+    public BigDecimal getPesoTotalRecibido() { return pesoTotalRecibido; }
+    public void setPesoTotalRecibido(BigDecimal pesoTotalRecibido) { this.pesoTotalRecibido = pesoTotalRecibido; }
+
+    public BigDecimal getDiferenciaTotal() { return diferenciaTotal; }
+    public void setDiferenciaTotal(BigDecimal diferenciaTotal) { this.diferenciaTotal = diferenciaTotal; }
+
+    public String getResultadoTolerancia() { return resultadoTolerancia; }
+    public void setResultadoTolerancia(String resultadoTolerancia) { this.resultadoTolerancia = resultadoTolerancia; }
+
+    public BigDecimal getTolerancia() { return tolerancia; }
+    public void setTolerancia(BigDecimal tolerancia) { this.tolerancia = tolerancia; }
+
+    public LocalDateTime getFechaModificacion() { return fechaModificacion; }
+    public void setFechaModificacion(LocalDateTime fechaModificacion) { this.fechaModificacion = fechaModificacion; }
 }

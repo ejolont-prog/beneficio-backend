@@ -1,6 +1,8 @@
 package com.example.beneficio.repository;
 
 import java.util.List;
+import java.util.Optional;
+
 import com.example.beneficio.dto.CuentaDetalleDTO;
 import com.example.beneficio.model.Cuenta;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -31,4 +33,10 @@ public interface CuentasRepository extends JpaRepository<Cuenta, Long> {
             "LEFT JOIN beneficio.catalogos cat ON c.estadopesaje = cat.id " +
             "WHERE c.eliminado = false", nativeQuery = true)
     List<CuentaDetalleDTO> findAllDetalles();
+
+    Optional<Cuenta> findByNoCuenta(String noCuenta);
+    @Query(value = "SELECT cat.detallecatalogo FROM beneficio.cuentas c " +
+            "LEFT JOIN beneficio.catalogos cat ON c.estadopesaje = cat.id " +
+            "WHERE c.nocuenta = :noCuenta", nativeQuery = true)
+    String findEstadoNombreByNoCuenta(@Param("noCuenta") String noCuenta);
 }
